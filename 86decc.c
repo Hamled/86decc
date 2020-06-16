@@ -34,58 +34,6 @@ REGISTER regbits_to_enum_w(uint8_t bits, OPSIZE size, bool w) {
     return REG_UNKNOWN;
 }
 
-static size_t decode_opcode_6x(uint8_t opcode_l, const uint8_t* ixns, INSTR* instr) {
-    switch(opcode_l) {
-        case 0b0000: // OP_PUSHA/OP_PUSHAD
-        case 0b0001: // OP_POPA/OP_POPAD
-            instr->opcode =
-                (opcode_l & 0x1) ? OP_POPAD : OP_PUSHAD;
-            return 1;
-        case 0b0010: // BOUND
-            break;
-        case 0b0011: // ARPL
-            break;
-        case 0b1000:
-        case 0b1010: // PUSH
-            break;
-        case 0b1001:
-        case 0b1011: // IMUL
-            break;
-        case 0b1100:
-        case 0b1101: // INS
-            break;
-        case 0b1110:
-        case 0b1111: // OUTS
-            break;
-    }
-
-    return 0;
-}
-
-static size_t decode_opcode_9x(uint8_t opcode_l, const uint8_t* ixns, INSTR* instr) {
-    switch(opcode_l) {
-        case 0b0000: // NOP/XCHG EAX, EAX
-            break;
-        case 0b1000: // OP_CBW/OP_CWDE
-        case 0b1001: // OP_CWD/OP_CDQ
-            instr->opcode =
-                (opcode_l & 0x1) ? OP_CDQ : OP_CWDE;
-            return 1;
-        case 0b1010: // CALL (direct, other seg)
-            break;
-        case 0b1011: // WAIT
-            break;
-        case 0b1100: // PUSHF/PUSHFD
-        case 0b1101: // POPF/POPFD
-            break;
-        case 0b1110: // SAHF
-        case 0b1111: // LAHF
-            break;
-    }
-
-    return 0;
-}
-
 static size_t decode_opcode_basic(uint8_t flags, const uint8_t* ixns, INSTR* instr) {
     // Parse flags
     const bool imm = flags & 0x4;
@@ -198,7 +146,15 @@ size_t decode(const uint8_t* ixns, INSTR* instr) {
             // PUSH (alternate)
             break;
         case 0b0110:
-            return decode_opcode_6x(opcode_l, ixns + 1, instr);
+            // OP_PUSHA/OP_PUSHAD
+            // OP_POPA/OP_POPAD
+            // BOUND
+            // ARPL
+            // PUSH
+            // IMUL
+            // INS
+            // OUTS
+            break;
         case 0b0111:
             // Jcc
             break;
@@ -219,6 +175,16 @@ size_t decode(const uint8_t* ixns, INSTR* instr) {
             // XOR (immediate)
             break;
         case 0b1001:
+            // NOP/XCHG EAX, EAX
+            // OP_CBW/OP_CWDE
+            // OP_CWD/OP_CDQ
+            // CALL (direct, other seg)
+            // WAIT
+            // PUSHF/PUSHFD
+            // POPF/POPFD
+            // SAHF
+            // LAHF
+            break;
         case 0b1010:
             // CMPS/CMPSB/CMPSW/CMPSD
             // LODS/LODSB/LODSW/LODSD
