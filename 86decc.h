@@ -55,10 +55,41 @@ typedef enum REGISTER_t {
     REG_EDI, // 24
 } REGISTER;
 
+typedef enum OPERAND_TYPE_t {
+    OT_NONE = 0,
+    OT_REGISTER,
+    OT_MEMORY,
+    OT_IMMEDIATE,
+    OT_MODRM,
+    OT_SIB,
+} OPERAND_TYPE;
+
+typedef struct OPERAND_MODRM_t {
+    REGISTER reg;
+    int32_t displacement;
+} OPERAND_MODRM;
+
+typedef struct OPERAND_SIB_t {
+    uint8_t scale;
+    REGISTER index;
+    REGISTER base;
+} OPERAND_SIB;
+
+typedef struct OPERAND_t {
+    OPERAND_TYPE type;
+    union {
+        REGISTER reg;
+        uint32_t memory;
+        uint32_t immediate;
+        OPERAND_MODRM modrm;
+        OPERAND_SIB sib;
+    };
+} OPERAND;
+
 typedef struct INSTR_t {
     OPCODE opcode;
-    uint32_t operand1;
-    uint32_t operand2;
+    OPERAND operand1;
+    OPERAND operand2;
 } INSTR;
 
 typedef enum OPSIZE_t {
