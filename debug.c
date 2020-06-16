@@ -31,5 +31,29 @@ void print_instr(INSTR* instr) {
         case OP_CDQ:
             puts("CDQ");
             break;
+        case OP_ADD:
+            puts("ADD");
+            break;
+        case OP_OR:
+            puts("OR");
+            break;
+        case OP_ADC:
+            puts("ADC");
+            break;
+        case OP_AND:
+            puts("AND");
+            break;
+        case OP_CMP:
+            puts("CMP");
+            break;
+        case OP_SBB:
+            puts("SBB");
+            break;
+        case OP_SUB:
+            puts("SUB");
+            break;
+        case OP_XOR:
+            puts("XOR");
+            break;
     }
 }
