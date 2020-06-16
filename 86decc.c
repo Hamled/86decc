@@ -35,7 +35,7 @@ REGISTER regbits_to_enum_w(uint8_t bits, OPSIZE size, bool w) {
     return REG_UNKNOWN;
 }
 
-size_t decode_opcode_6x(uint8_t opcode_l, const uint8_t* ixns, INSTR* instr) {
+static size_t decode_opcode_6x(uint8_t opcode_l, const uint8_t* ixns, INSTR* instr) {
     switch(opcode_l) {
         case 0b0000: // OP_PUSHA/OP_PUSHAD
         case 0b0001: // OP_POPA/OP_POPAD
@@ -63,7 +63,7 @@ size_t decode_opcode_6x(uint8_t opcode_l, const uint8_t* ixns, INSTR* instr) {
     return 0;
 }
 
-size_t decode_opcode_9x(uint8_t opcode_l, const uint8_t* ixns, INSTR* instr) {
+static size_t decode_opcode_9x(uint8_t opcode_l, const uint8_t* ixns, INSTR* instr) {
     switch(opcode_l) {
         case 0b0000: // NOP/XCHG EAX, EAX
             break;
@@ -87,7 +87,7 @@ size_t decode_opcode_9x(uint8_t opcode_l, const uint8_t* ixns, INSTR* instr) {
     return 0;
 }
 
-size_t decode_opcode_basic(uint8_t flags, const uint8_t* ixns, INSTR* instr) {
+static size_t decode_opcode_basic(uint8_t flags, const uint8_t* ixns, INSTR* instr) {
     // Parse flags
     const bool imm = flags & 0x4;
     const bool d = flags & 0x2;
