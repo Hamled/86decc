@@ -53,7 +53,7 @@ static size_t decode_opcode_basic(uint8_t flags, const uint8_t* ixns, INSTR* ins
 
     const uint8_t modrm = *ixns;
     const uint8_t mod = modrm >> 6;
-    const uint8_t rm  = modrm & 0x3;
+    const uint8_t rm  = modrm & 0x7;
     const uint8_t reg = (modrm & 0x38) >> 3;
 
     switch(mod) {
