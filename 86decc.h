@@ -27,7 +27,8 @@ typedef enum OPCODE_t {
 } OPCODE;
 
 typedef enum REGISTER_t {
-    REG_UNKNOWN,
+    REG_UNKNOWN = -1,
+    REG_NONE,
     REG_AL,  // 1
     REG_AH,
     REG_AX,
