@@ -41,7 +41,7 @@ static size_t decode_opcode_basic(uint8_t flags, const uint8_t* ixns, INSTR* ins
     const bool w = flags & 0x1;
 
     if(imm) {
-        if(w) {
+        if(!w) {
             instr->operand1 = *ixns;
             return 2;
         }
@@ -70,7 +70,7 @@ static size_t decode_opcode_basic(uint8_t flags, const uint8_t* ixns, INSTR* ins
     }
 
     // If direction bit is set, swap the operands
-    if(d) {
+    if(!d) {
         uint32_t tmp = instr->operand1;
         instr->operand1 = instr->operand2;
         instr->operand2 = tmp;
