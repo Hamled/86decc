@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-REGISTER regbits_to_enum_w(uint8_t bits, OPSIZE size, bool w) {
+REGISTER regbits_to_enum_w(uint8_t bits, bool w, OPSIZE size) {
     switch(bits) {
         case 0b000:
             if(!w) return REG_AL;
