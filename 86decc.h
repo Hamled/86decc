@@ -28,30 +28,30 @@ typedef enum OPCODE_t {
 
 typedef enum REGISTER_t {
     REG_UNKNOWN,
-    REG_AL,
+    REG_AL,  // 1
     REG_AH,
     REG_AX,
-    REG_EAX,
-    REG_BL,
+    REG_EAX, // 4
+    REG_BL,  // 5
     REG_BH,
     REG_BX,
-    REG_EBX,
-    REG_CL,
+    REG_EBX, // 8
+    REG_CL,  // 9
     REG_CH,
     REG_CX,
-    REG_ECX,
-    REG_DL,
+    REG_ECX, // 12
+    REG_DL,  // 13
     REG_DH,
     REG_DX,
-    REG_EDX,
+    REG_EDX, // 16
     REG_SP,
-    REG_ESP,
+    REG_ESP, // 18
     REG_BP,
-    REG_EBP,
+    REG_EBP, // 20
     REG_SI,
-    REG_ESI,
+    REG_ESI, // 22
     REG_DI,
-    REG_EDI,
+    REG_EDI, // 24
 } REGISTER;
 
 typedef struct INSTR_t {
