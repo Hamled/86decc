@@ -1,4 +1,5 @@
 #include "86decc.h"
+#include "debug.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -297,37 +298,6 @@ size_t decode(const uint8_t* ixns, INSTR* instr) {
     }
 
     return 0;
-}
-
-void print_instr(INSTR* instr) {
-    if(!instr) abort();
-
-    switch(instr->opcode) {
-        case OP_PUSHA:
-            puts("PUSHA");
-            break;
-        case POPA:
-            puts("POPA");
-            break;
-        case PUSHAD:
-            puts("PUSHAD");
-            break;
-        case POPAD:
-            puts("POPAD");
-            break;
-        case CBW:
-            puts("CBW");
-            break;
-        case CWDE:
-            puts("CWDE");
-            break;
-        case CWD:
-            puts("CWD");
-            break;
-        case CDQ:
-            puts("CDQ");
-            break;
-    }
 }
 
 uint8_t TEST1[] = { 0x61, 0x61, 0x98, 0x60, 0x99, 0x61, 0x60, 0x98, 0x60 };
