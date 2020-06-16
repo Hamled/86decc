@@ -6,6 +6,7 @@
 #include <stdlib.h>
 
 typedef enum OPCODE_t {
+    OP_UNKNOWN = 0,
     OP_PUSHA,
     OP_PUSHAD,
     OP_POPA,

@@ -7,6 +7,9 @@ void print_instr(INSTR* instr) {
     if(!instr) abort();
 
     switch(instr->opcode) {
+        case OP_UNKNOWN:
+            puts("--UNKNOWN--BUG--");
+            break;
         case OP_PUSHA:
             puts("PUSHA");
             break;
