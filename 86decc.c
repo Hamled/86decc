@@ -1,6 +1,7 @@
 #include "86decc.h"
 #include "debug.h"
 
+#include <math.h>
 #include <stdlib.h>
 
 REGISTER regbits_to_enum_w(uint8_t bits, bool w, OPSIZE size) {
@@ -32,6 +33,26 @@ REGISTER regbits_to_enum_w(uint8_t bits, bool w, OPSIZE size) {
     }
 
     return REG_UNKNOWN;
+}
+
+static void decode_sib(const uint8_t sib, const uint8_t mod, OPERAND* oper) {
+    const uint8_t scale = sib >> 6;
+    const uint8_t index = (sib & 0x38) >> 3;
+    const uint8_t base = sib & 0x7;
+
+    oper->type = OT_SIB;
+    oper->sib.scale = pow(2, scale);
+    oper->sib.index = regbits_to_enum_w(index, true, SIZE_32);
+    oper->sib.base = regbits_to_enum_w(base, true, SIZE_32);
+
+    if(index == 0b100) {
+        oper->sib.scale = 0;
+        oper->sib.index = REG_NONE;
+    }
+
+    if(mod == 0b00 && base == 0b101) {
+        oper->sib.base = REG_NONE;
+    }
 }
 
 static size_t decode_opcode_basic(uint8_t flags, const uint8_t* ixns, INSTR* instr) {
@@ -70,6 +91,13 @@ static size_t decode_opcode_basic(uint8_t flags, const uint8_t* ixns, INSTR* ins
         case 0b00:
             if(rm == 0b100) {
                 // SIB
+                decode_sib(*(ixns + 1), mod, &instr->operand2);
+                instr_size += 1;
+                if(instr->operand2.sib.base == REG_NONE) {
+                    // SIB + 32-bit displacement
+                    instr->operand2.sib.displacement = *(int32_t*)(ixns + 2);
+                    instr_size += 4;
+                }
             } else if(rm == 0b101) {
                 // 32-bit displacement
                 instr->operand2.modrm.reg = REG_NONE;
@@ -86,6 +114,9 @@ static size_t decode_opcode_basic(uint8_t flags, const uint8_t* ixns, INSTR* ins
             instr_size += 1;
             if(rm == 0b100) {
                 // SIB + 8-bit displacement
+                decode_sib(*(ixns + 1), mod, &instr->operand2);
+                instr->operand2.sib.displacement = *(int8_t*)(ixns + 2);
+                instr_size += 1;
             } else {
                 // 32-bit register + 8-bit displacement
                 instr->operand2.modrm.reg = regbits_to_enum_w(rm, true, SIZE_32);
@@ -96,6 +127,9 @@ static size_t decode_opcode_basic(uint8_t flags, const uint8_t* ixns, INSTR* ins
             instr_size += 4;
             if(rm == 0b100) {
                 // SIB + 32-bit displacement
+                decode_sib(*(ixns + 1), mod, &instr->operand2);
+                instr->operand2.sib.displacement = *(int32_t*)(ixns + 2);
+                instr_size += 1;
             } else {
                 // 32-bit register + 32-bit displacement
                 instr->operand2.modrm.reg = regbits_to_enum_w(rm, true, SIZE_32);
