@@ -5,7 +5,7 @@
 # @version 0.1
 
 CC=clang
-CFLAGS=-g -Wall -Wextra -Werror -fPIC -fstack-protector
+CFLAGS= -lm -g -Wall -Wextra -Werror -fPIC -fstack-protector
 OUTPUTS=86decc 86decc-test
 
 86decc: main.c debug.c 86decc.c
