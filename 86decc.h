@@ -73,6 +73,7 @@ typedef struct OPERAND_SIB_t {
     uint8_t scale;
     REGISTER index;
     REGISTER base;
+    int32_t displacement;
 } OPERAND_SIB;
 
 typedef struct OPERAND_t {
