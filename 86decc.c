@@ -55,6 +55,8 @@ static size_t decode_opcode_basic(uint8_t flags, const uint8_t* ixns, INSTR* ins
         return 5;
     }
 
+    size_t instr_size = 2;
+
     const uint8_t modrm = *ixns;
     const uint8_t mod = modrm >> 6;
     const uint8_t rm  = modrm & 0x7;
@@ -72,6 +74,8 @@ static size_t decode_opcode_basic(uint8_t flags, const uint8_t* ixns, INSTR* ins
                 // 32-bit displacement
                 instr->operand2.modrm.reg = REG_NONE;
                 instr->operand2.modrm.displacement = *(int32_t*)(ixns + 1);
+
+                instr_size += 4;
             } else {
                 // 32-bit register, no displacement
                 instr->operand2.modrm.reg = regbits_to_enum_w(rm, true, SIZE_32);
@@ -79,8 +83,9 @@ static size_t decode_opcode_basic(uint8_t flags, const uint8_t* ixns, INSTR* ins
             }
             break;
         case 0b01:
+            instr_size += 1;
             if(rm == 0b100) {
-                // SIB
+                // SIB + 8-bit displacement
             } else {
                 // 32-bit register + 8-bit displacement
                 instr->operand2.modrm.reg = regbits_to_enum_w(rm, true, SIZE_32);
@@ -88,8 +93,9 @@ static size_t decode_opcode_basic(uint8_t flags, const uint8_t* ixns, INSTR* ins
             }
             break;
         case 0b10:
+            instr_size += 4;
             if(rm == 0b100) {
-                // SIB
+                // SIB + 32-bit displacement
             } else {
                 // 32-bit register + 32-bit displacement
                 instr->operand2.modrm.reg = regbits_to_enum_w(rm, true, SIZE_32);
@@ -110,7 +116,7 @@ static size_t decode_opcode_basic(uint8_t flags, const uint8_t* ixns, INSTR* ins
         instr->operand2 = tmp;
     }
 
-    return 2; // These are all 2 byte instructions
+    return instr_size;
 }
 
 

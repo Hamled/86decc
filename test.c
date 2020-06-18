@@ -126,3 +126,63 @@ UTEST(cmp, reg8_disp32) {
     ASSERT_EQ((REGISTER)REG_NONE, output.operand2.modrm.reg);
     ASSERT_EQ((int32_t)0xD4C3B2A1, output.operand2.modrm.displacement);
 }
+
+UTEST(multi, instr2_disp8) {
+    const uint8_t input[] = { 0x09, 0x6E, 0x44, 0x00, 0x00 };
+    INSTR output = {0};
+
+    const uint8_t* cursor = input;
+    const size_t instr_size = decode(cursor, &output);
+
+    ASSERT_EQ((OPCODE)OP_OR, output.opcode);
+
+    ASSERT_EQ((OPERAND_TYPE)OT_MODRM, output.operand1.type);
+    ASSERT_EQ((REGISTER)REG_ESI, output.operand1.modrm.reg);
+    ASSERT_EQ((int32_t)0x44, output.operand1.modrm.displacement);
+
+    ASSERT_EQ((OPERAND_TYPE)OT_REGISTER, output.operand2.type);
+    ASSERT_EQ((REGISTER)REG_EBP, output.operand2.reg);
+
+    memset(&output, 0, sizeof(output));
+    cursor += instr_size;
+    decode(cursor, &output);
+
+    ASSERT_EQ((OPCODE)OP_ADD, output.opcode);
+
+    ASSERT_EQ((OPERAND_TYPE)OT_MODRM, output.operand1.type);
+    ASSERT_EQ((REGISTER)REG_EAX, output.operand1.modrm.reg);
+    ASSERT_EQ((int32_t)0, output.operand1.modrm.displacement);
+
+    ASSERT_EQ((OPERAND_TYPE)OT_REGISTER, output.operand2.type);
+    ASSERT_EQ((REGISTER)REG_AL, output.operand2.reg);
+}
+
+UTEST(multi, instr2_disp32) {
+    const uint8_t input[] = { 0x3A, 0x3D, 0xA1, 0xB2, 0xC3, 0xD4, 0x00, 0x00 };
+    INSTR output = {0};
+
+    const uint8_t* cursor = input;
+    const size_t instr_size = decode(cursor, &output);
+
+    ASSERT_EQ((OPCODE)OP_CMP, output.opcode);
+
+    ASSERT_EQ((OPERAND_TYPE)OT_REGISTER, output.operand1.type);
+    ASSERT_EQ((REGISTER)REG_BH, output.operand1.reg);
+
+    ASSERT_EQ((OPERAND_TYPE)OT_MODRM, output.operand2.type);
+    ASSERT_EQ((REGISTER)REG_NONE, output.operand2.modrm.reg);
+    ASSERT_EQ((int32_t)0xD4C3B2A1, output.operand2.modrm.displacement);
+
+    memset(&output, 0, sizeof(output));
+    cursor += instr_size;
+    decode(cursor, &output);
+
+    ASSERT_EQ((OPCODE)OP_ADD, output.opcode);
+
+    ASSERT_EQ((OPERAND_TYPE)OT_MODRM, output.operand1.type);
+    ASSERT_EQ((REGISTER)REG_EAX, output.operand1.modrm.reg);
+    ASSERT_EQ((int32_t)0, output.operand1.modrm.displacement);
+
+    ASSERT_EQ((OPERAND_TYPE)OT_REGISTER, output.operand2.type);
+    ASSERT_EQ((REGISTER)REG_AL, output.operand2.reg);
+}
