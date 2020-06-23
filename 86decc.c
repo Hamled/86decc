@@ -36,6 +36,10 @@ REGISTER regbits_to_enum_w(uint8_t bits, bool w, OPSIZE size) {
     return REG_UNKNOWN;
 }
 
+static uint8_t opcode_extension(const uint8_t modrm) {
+   return (modrm & 0b111000) >> 3;
+}
+
 static void decode_sib(const uint8_t sib, const uint8_t mod, OPERAND* oper) {
     const uint8_t scale = sib >> 6;
     const uint8_t index = (sib & 0x38) >> 3;
@@ -192,8 +196,22 @@ static size_t decode_opcode_grp1_imm(uint8_t flags, const uint8_t* ixns, INSTR* 
     return instr_size;
 }
 
-uint8_t opcode_extension(const uint8_t modrm) {
-   return (modrm & 0b111000) >> 3;
+static size_t decode_opcode_grp4_5(const uint8_t flags, const uint8_t* ixns, INSTR* instr) {
+    const bool w = (flags & 0b0001) == 0b0001;
+    size_t instr_size = 1;
+
+    const uint8_t ext = opcode_extension(*ixns);
+    if((ext & 0b110) == 0b000) {
+        // INC or DEC
+        instr->opcode = OP_INC + (ext & 0b001);
+        instr_size += decode_modrm(*ixns, w, ixns + 1, instr);
+        // Always swap instructions and set operand2 to none
+        instr->operand1 = instr->operand2;
+        memset(&instr->operand2, 0, sizeof(OPERAND));
+        return instr_size;
+    }
+
+    return 0;
 }
 
 // Decode a single instruction from the byte stream ixns
@@ -351,27 +369,25 @@ size_t decode(const uint8_t* ixns, INSTR* instr) {
             // OUT
             break;
         case 0b1111:
-            // CALL (indirect)
             // CLC
             // CLD
             // CLI
             // CMC
-            // DEC
             // DIV
             // HALT
             // IDIV
             // IMUL EAX
-            // INC
-            // JMP (indirect)
             // LOCK
             // MUL
             // NEG
             // NOT
-            // PUSH
             // STC
             // STD
             // STI
             // TEST (immediate)
+            if((opcode_l & 0b1110) == 0b1110) {
+                return decode_opcode_grp4_5(opcode_l, ixns + 1, instr);
+            }
             break;
     }
 

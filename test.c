@@ -472,6 +472,80 @@ UTEST(inc, alternate) {
     }
 }
 
+UTEST(inc, reg8) {
+    const uint8_t input[] = { 0xFE, 0xC3 };
+
+    INSTR output = {0};
+
+    const size_t instr_size = decode(input, &output);
+
+    ASSERT_EQ((OPCODE)OP_INC, output.opcode);
+    ASSERT_EQ((size_t)2, instr_size);
+
+    OPERAND op1 = output.operand1;
+    ASSERT_EQ((OPERAND_TYPE)OT_REGISTER, op1.type);
+    ASSERT_EQ((REGISTER)REG_BL, op1.modrm.reg);
+
+    ASSERT_EQ((OPERAND_TYPE)OT_NONE, output.operand2.type);
+}
+
+UTEST(inc, reg32) {
+    const uint8_t input[] = { 0xFF, 0xC2 };
+
+    INSTR output = {0};
+
+    const size_t instr_size = decode(input, &output);
+
+    ASSERT_EQ((OPCODE)OP_INC, output.opcode);
+    ASSERT_EQ((size_t)2, instr_size);
+
+    OPERAND op1 = output.operand1;
+    ASSERT_EQ((OPERAND_TYPE)OT_REGISTER, op1.type);
+    ASSERT_EQ((REGISTER)REG_EDX, op1.modrm.reg);
+
+    ASSERT_EQ((OPERAND_TYPE)OT_NONE, output.operand2.type);
+}
+
+UTEST(inc, sibdisp32_8) {
+    const uint8_t input[] = { 0xFE, 0x84, 0xB2, 0x1F, 0x00, 0x00, 0x00 };
+
+    INSTR output = {0};
+
+    const size_t instr_size = decode(input, &output);
+
+    ASSERT_EQ((OPCODE)OP_INC, output.opcode);
+    ASSERT_EQ((size_t)7, instr_size);
+
+    OPERAND op1 = output.operand1;
+    ASSERT_EQ((OPERAND_TYPE)OT_SIB, op1.type);
+    ASSERT_EQ(0x4, op1.sib.scale);
+    ASSERT_EQ((REGISTER)REG_ESI, op1.sib.index);
+    ASSERT_EQ((REGISTER)REG_EDX, op1.sib.base);
+    ASSERT_EQ(0x1F, op1.sib.displacement);
+
+    ASSERT_EQ((OPERAND_TYPE)OT_NONE, output.operand2.type);
+}
+
+UTEST(inc, sibdisp8_32) {
+    const uint8_t input[] = { 0xFF, 0x44, 0xD0, 0x2F };
+
+    INSTR output = {0};
+
+    const size_t instr_size = decode(input, &output);
+
+    ASSERT_EQ((OPCODE)OP_INC, output.opcode);
+    ASSERT_EQ((size_t)4, instr_size);
+
+    OPERAND op1 = output.operand1;
+    ASSERT_EQ((OPERAND_TYPE)OT_SIB, op1.type);
+    ASSERT_EQ(0x8, op1.sib.scale);
+    ASSERT_EQ((REGISTER)REG_EDX, op1.sib.index);
+    ASSERT_EQ((REGISTER)REG_EAX, op1.sib.base);
+    ASSERT_EQ(0x2F, op1.sib.displacement);
+
+    ASSERT_EQ((OPERAND_TYPE)OT_NONE, output.operand2.type);
+}
+
 UTEST(dec, alternate) {
     const uint8_t input[] = { 0x48, 0x49, 0x4A, 0x4B,
                               0x4C, 0x4D, 0x4E, 0x4F };
@@ -493,4 +567,78 @@ UTEST(dec, alternate) {
 
         cursor += instr_size;
     }
+}
+
+UTEST(dec, reg8) {
+    const uint8_t input[] = { 0xFE, 0xCB };
+
+    INSTR output = {0};
+
+    const size_t instr_size = decode(input, &output);
+
+    ASSERT_EQ((OPCODE)OP_DEC, output.opcode);
+    ASSERT_EQ((size_t)2, instr_size);
+
+    OPERAND op1 = output.operand1;
+    ASSERT_EQ((OPERAND_TYPE)OT_REGISTER, op1.type);
+    ASSERT_EQ((REGISTER)REG_BL, op1.modrm.reg);
+
+    ASSERT_EQ((OPERAND_TYPE)OT_NONE, output.operand2.type);
+}
+
+UTEST(dec, reg32) {
+    const uint8_t input[] = { 0xFF, 0xCA };
+
+    INSTR output = {0};
+
+    const size_t instr_size = decode(input, &output);
+
+    ASSERT_EQ((OPCODE)OP_DEC, output.opcode);
+    ASSERT_EQ((size_t)2, instr_size);
+
+    OPERAND op1 = output.operand1;
+    ASSERT_EQ((OPERAND_TYPE)OT_REGISTER, op1.type);
+    ASSERT_EQ((REGISTER)REG_EDX, op1.modrm.reg);
+
+    ASSERT_EQ((OPERAND_TYPE)OT_NONE, output.operand2.type);
+}
+
+UTEST(dec, sibdisp32_8) {
+    const uint8_t input[] = { 0xFE, 0x8C, 0xB2, 0x1F, 0x00, 0x00, 0x00 };
+
+    INSTR output = {0};
+
+    const size_t instr_size = decode(input, &output);
+
+    ASSERT_EQ((OPCODE)OP_DEC, output.opcode);
+    ASSERT_EQ((size_t)7, instr_size);
+
+    OPERAND op1 = output.operand1;
+    ASSERT_EQ((OPERAND_TYPE)OT_SIB, op1.type);
+    ASSERT_EQ(0x4, op1.sib.scale);
+    ASSERT_EQ((REGISTER)REG_ESI, op1.sib.index);
+    ASSERT_EQ((REGISTER)REG_EDX, op1.sib.base);
+    ASSERT_EQ(0x1F, op1.sib.displacement);
+
+    ASSERT_EQ((OPERAND_TYPE)OT_NONE, output.operand2.type);
+}
+
+UTEST(dec, sibdisp8_32) {
+    const uint8_t input[] = { 0xFF, 0x4C, 0xD0, 0x2F };
+
+    INSTR output = {0};
+
+    const size_t instr_size = decode(input, &output);
+
+    ASSERT_EQ((OPCODE)OP_DEC, output.opcode);
+    ASSERT_EQ((size_t)4, instr_size);
+
+    OPERAND op1 = output.operand1;
+    ASSERT_EQ((OPERAND_TYPE)OT_SIB, op1.type);
+    ASSERT_EQ(0x8, op1.sib.scale);
+    ASSERT_EQ((REGISTER)REG_EDX, op1.sib.index);
+    ASSERT_EQ((REGISTER)REG_EAX, op1.sib.base);
+    ASSERT_EQ(0x2F, op1.sib.displacement);
+
+    ASSERT_EQ((OPERAND_TYPE)OT_NONE, output.operand2.type);
 }
