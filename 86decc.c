@@ -3,6 +3,7 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <string.h>
 
 REGISTER regbits_to_enum_w(uint8_t bits, bool w, OPSIZE size) {
     switch(bits) {
@@ -59,7 +60,7 @@ static void decode_sib(const uint8_t sib, const uint8_t mod, OPERAND* oper) {
 static size_t decode_modrm(const uint8_t modrm, const bool w, const uint8_t* ixns, INSTR* instr) {
     const uint8_t mod = modrm >> 6;
     const uint8_t rm  = modrm & 0x7;
-    const uint8_t reg = (modrm & 0x38) >> 3;
+    const uint8_t reg = (modrm & 0b111000) >> 3;
 
     size_t instr_size = 1;
 
@@ -125,7 +126,7 @@ static size_t decode_modrm(const uint8_t modrm, const bool w, const uint8_t* ixn
     return instr_size;
 }
 
-static size_t decode_opcode_basic(uint8_t flags, const uint8_t* ixns, INSTR* instr) {
+static size_t decode_opcode_grp1(uint8_t flags, const uint8_t* ixns, INSTR* instr) {
     // Parse flags
     const bool imm = flags & 0x4;
     const bool d = flags & 0x2;
@@ -162,6 +163,38 @@ static size_t decode_opcode_basic(uint8_t flags, const uint8_t* ixns, INSTR* ins
     return instr_size;
 }
 
+static size_t decode_opcode_grp1_imm(uint8_t flags, const uint8_t* ixns, INSTR* instr) {
+    // Parse flags
+    const bool s = flags & 0x2;
+    const bool w = flags & 0x1;
+
+    size_t instr_size = 1;
+
+    const uint8_t modrm = *ixns;
+    instr_size += decode_modrm(modrm, w, ixns + 1, instr);
+
+    // Always swap since decode_modrm sets operand2
+    instr->operand1 = instr->operand2;
+    memset(&instr->operand2, 0, sizeof(OPERAND));
+
+    instr->operand2.type = OT_IMMEDIATE;
+    if(!w) {
+        instr->operand2.immediate = *ixns;
+        instr_size += 1;
+    } else if(s) {
+        instr->operand2.immediate = (int32_t)*(int8_t*)(ixns + instr_size - 1);
+        instr_size += 1;
+    } else {
+        instr->operand2.immediate = *(uint32_t*)(ixns + instr_size - 1);
+        instr_size += 4;
+    }
+
+    return instr_size;
+}
+
+uint8_t opcode_extension(const uint8_t modrm) {
+   return (modrm & 0b111000) >> 3;
+}
 
 // Decode a single instruction from the byte stream ixns
 // into the INSTR structure passed by reference
@@ -195,12 +228,12 @@ size_t decode(const uint8_t* ixns, INSTR* instr) {
             // OP_ADD
             // OP_OR
             instr->opcode = (opcode_l & 0x8) ? OP_OR : OP_ADD;
-            return decode_opcode_basic(opcode_l & 0x7, ixns + 1, instr);
+            return decode_opcode_grp1(opcode_l & 0x7, ixns + 1, instr);
         case 0b0001:
             // ADC
             // SBB
             instr->opcode = (opcode_l & 0x8) ? OP_SBB : OP_ADC;
-            return decode_opcode_basic(opcode_l & 0x7, ixns + 1, instr);
+            return decode_opcode_grp1(opcode_l & 0x7, ixns + 1, instr);
         case 0b0010:
             // DAA
             // DAS
@@ -209,7 +242,7 @@ size_t decode(const uint8_t* ixns, INSTR* instr) {
             // AND
             // SUB
             instr->opcode = (opcode_l & 0x8) ? OP_SUB : OP_AND;
-            return decode_opcode_basic(opcode_l & 0x7, ixns + 1, instr);
+            return decode_opcode_grp1(opcode_l & 0x7, ixns + 1, instr);
         case 0b0011:
             // AAA
             // AAS
@@ -218,7 +251,7 @@ size_t decode(const uint8_t* ixns, INSTR* instr) {
             // CMP
             // XOR
             instr->opcode = (opcode_l & 0x8) ? OP_CMP : OP_XOR;
-            return decode_opcode_basic(opcode_l & 0x7, ixns + 1, instr);
+            return decode_opcode_grp1(opcode_l & 0x7, ixns + 1, instr);
 
         case 0b0100:
             // DEC (alternate)
@@ -242,20 +275,13 @@ size_t decode(const uint8_t* ixns, INSTR* instr) {
             // Jcc
             break;
         case 0b1000:
-            // ADC (immediate)
-            // OP_ADD (immediate)
-            // AND (immediate)
-            // CMP (immediate)
-            // LEA
-            // MOV
-            // MOV (seg register)
-            // OP_OR (immediate)
-            // POP
-            // SBB (immediate)
-            // SUB (immediate)
-            // TEST
-            // XCHG
-            // XOR (immediate)
+            // Immediate versions of:
+            // ADC ADD AND CMP
+            // OR SBB SUB XOR
+            if((opcode_l >> 2) == 0) {
+                instr->opcode = (OP_ADD + opcode_extension(*(ixns + 1)));
+                return decode_opcode_grp1_imm(opcode_l & 0x3, ixns + 1, instr);
+            }
             break;
         case 0b1001:
             // NOP/XCHG EAX, EAX

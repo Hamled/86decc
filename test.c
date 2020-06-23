@@ -389,3 +389,62 @@ UTEST(add, reg8__sibdisp32_ebp) {
         cursor += instr_size;
     }
 }
+
+UTEST(add, reg32_imm32_nosign) {
+    const uint8_t input[] = { 0x81, 0xC0, 0x01, 0x02, 0x03, 0x04 };
+
+    INSTR output = {0};
+
+    const size_t instr_size = decode(input, &output);
+
+    ASSERT_EQ((OPCODE)OP_ADD, output.opcode);
+    ASSERT_EQ((size_t)6, instr_size);
+
+    OPERAND op1 = output.operand1;
+    ASSERT_EQ((OPERAND_TYPE)OT_REGISTER, op1.type);
+    ASSERT_EQ((REGISTER)REG_EAX, op1.reg);
+
+    OPERAND op2 = output.operand2;
+    ASSERT_EQ((OPERAND_TYPE)OT_IMMEDIATE, op2.type);
+    ASSERT_EQ((uint32_t)0x04030201, op2.immediate);
+}
+
+UTEST(cmp, memdisp32_imm32_nosign) {
+    const uint8_t input[] = { 0x81, 0xB9, 0x0A, 0x00, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04 };
+
+    INSTR output = {0};
+
+    const size_t instr_size = decode(input, &output);
+
+    ASSERT_EQ((OPCODE)OP_CMP, output.opcode);
+    ASSERT_EQ((size_t)10, instr_size);
+
+    OPERAND op1 = output.operand1;
+    ASSERT_EQ((OPERAND_TYPE)OT_MODRM, op1.type);
+    ASSERT_EQ((REGISTER)REG_ECX, op1.modrm.reg);
+    ASSERT_EQ((int32_t)0x0A, op1.modrm.displacement);
+
+    OPERAND op2 = output.operand2;
+    ASSERT_EQ((OPERAND_TYPE)OT_IMMEDIATE, op2.type);
+    ASSERT_EQ((uint32_t)0x04030201, op2.immediate);
+}
+
+UTEST(xor, memnodisp_imm8_sign) {
+    const uint8_t input[] = { 0x83, 0x32, 0x91 };
+
+    INSTR output = {0};
+
+    const size_t instr_size = decode(input, &output);
+
+    ASSERT_EQ((OPCODE)OP_XOR, output.opcode);
+    ASSERT_EQ((size_t)3, instr_size);
+
+    OPERAND op1 = output.operand1;
+    ASSERT_EQ((OPERAND_TYPE)OT_MODRM, op1.type);
+    ASSERT_EQ((REGISTER)REG_EDX, op1.modrm.reg);
+    ASSERT_EQ((int32_t)0x0, op1.modrm.displacement);
+
+    OPERAND op2 = output.operand2;
+    ASSERT_EQ((OPERAND_TYPE)OT_IMMEDIATE, op2.type);
+    ASSERT_EQ((uint32_t)0xFFFFFF91, op2.immediate);
+}
