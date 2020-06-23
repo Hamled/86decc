@@ -55,6 +55,76 @@ static void decode_sib(const uint8_t sib, const uint8_t mod, OPERAND* oper) {
     }
 }
 
+/* Assumes ixns points to the byte following modrm byte */
+static size_t decode_modrm(const uint8_t modrm, const bool w, const uint8_t* ixns, INSTR* instr) {
+    const uint8_t mod = modrm >> 6;
+    const uint8_t rm  = modrm & 0x7;
+    const uint8_t reg = (modrm & 0x38) >> 3;
+
+    size_t instr_size = 1;
+
+    instr->operand1.type = OT_REGISTER;
+    instr->operand1.reg = regbits_to_enum_w(reg, w, SIZE_32);
+
+    instr->operand2.type = OT_MODRM;
+    switch(mod) {
+        case 0b00:
+            if(rm == 0b100) {
+                // SIB
+                decode_sib(*ixns, mod, &instr->operand2);
+                instr_size += 1;
+                if(instr->operand2.sib.base == REG_NONE) {
+                    // SIB + 32-bit displacement
+                    instr->operand2.sib.displacement = *(int32_t*)(ixns + 1);
+                    instr_size += 4;
+                }
+            } else if(rm == 0b101) {
+                // 32-bit displacement
+                instr->operand2.modrm.reg = REG_NONE;
+                instr->operand2.modrm.displacement = *(int32_t*)ixns;
+
+                instr_size += 4;
+            } else {
+                // 32-bit register, no displacement
+                instr->operand2.modrm.reg = regbits_to_enum_w(rm, true, SIZE_32);
+                instr->operand2.modrm.displacement = 0;
+            }
+            break;
+        case 0b01:
+            instr_size += 1;
+            if(rm == 0b100) {
+                // SIB + 8-bit displacement
+                decode_sib(*ixns, mod, &instr->operand2);
+                instr->operand2.sib.displacement = *(int8_t*)(ixns + 1);
+                instr_size += 1;
+            } else {
+                // 32-bit register + 8-bit displacement
+                instr->operand2.modrm.reg = regbits_to_enum_w(rm, true, SIZE_32);
+                instr->operand2.modrm.displacement = *(int8_t*)ixns;
+            }
+            break;
+        case 0b10:
+            instr_size += 4;
+            if(rm == 0b100) {
+                // SIB + 32-bit displacement
+                decode_sib(*ixns, mod, &instr->operand2);
+                instr->operand2.sib.displacement = *(int32_t*)(ixns + 1);
+                instr_size += 1;
+            } else {
+                // 32-bit register + 32-bit displacement
+                instr->operand2.modrm.reg = regbits_to_enum_w(rm, true, SIZE_32);
+                instr->operand2.modrm.displacement = *(int32_t*)ixns;
+            }
+            break;
+        case 0b11:
+            instr->operand2.type = OT_REGISTER;
+            instr->operand2.reg = regbits_to_enum_w(rm, w, SIZE_32);
+            break;
+    }
+
+    return instr_size;
+}
+
 static size_t decode_opcode_basic(uint8_t flags, const uint8_t* ixns, INSTR* instr) {
     // Parse flags
     const bool imm = flags & 0x4;
@@ -76,71 +146,10 @@ static size_t decode_opcode_basic(uint8_t flags, const uint8_t* ixns, INSTR* ins
         return 5;
     }
 
-    size_t instr_size = 2;
+    size_t instr_size = 1;
 
     const uint8_t modrm = *ixns;
-    const uint8_t mod = modrm >> 6;
-    const uint8_t rm  = modrm & 0x7;
-    const uint8_t reg = (modrm & 0x38) >> 3;
-
-    instr->operand1.type = OT_REGISTER;
-    instr->operand1.reg = regbits_to_enum_w(reg, w, SIZE_32);
-
-    instr->operand2.type = OT_MODRM;
-    switch(mod) {
-        case 0b00:
-            if(rm == 0b100) {
-                // SIB
-                decode_sib(*(ixns + 1), mod, &instr->operand2);
-                instr_size += 1;
-                if(instr->operand2.sib.base == REG_NONE) {
-                    // SIB + 32-bit displacement
-                    instr->operand2.sib.displacement = *(int32_t*)(ixns + 2);
-                    instr_size += 4;
-                }
-            } else if(rm == 0b101) {
-                // 32-bit displacement
-                instr->operand2.modrm.reg = REG_NONE;
-                instr->operand2.modrm.displacement = *(int32_t*)(ixns + 1);
-
-                instr_size += 4;
-            } else {
-                // 32-bit register, no displacement
-                instr->operand2.modrm.reg = regbits_to_enum_w(rm, true, SIZE_32);
-                instr->operand2.modrm.displacement = 0;
-            }
-            break;
-        case 0b01:
-            instr_size += 1;
-            if(rm == 0b100) {
-                // SIB + 8-bit displacement
-                decode_sib(*(ixns + 1), mod, &instr->operand2);
-                instr->operand2.sib.displacement = *(int8_t*)(ixns + 2);
-                instr_size += 1;
-            } else {
-                // 32-bit register + 8-bit displacement
-                instr->operand2.modrm.reg = regbits_to_enum_w(rm, true, SIZE_32);
-                instr->operand2.modrm.displacement = *(int8_t*)(ixns + 1);
-            }
-            break;
-        case 0b10:
-            instr_size += 4;
-            if(rm == 0b100) {
-                // SIB + 32-bit displacement
-                decode_sib(*(ixns + 1), mod, &instr->operand2);
-                instr->operand2.sib.displacement = *(int32_t*)(ixns + 2);
-                instr_size += 1;
-            } else {
-                // 32-bit register + 32-bit displacement
-                instr->operand2.modrm.reg = regbits_to_enum_w(rm, true, SIZE_32);
-                instr->operand2.modrm.displacement = *(int32_t*)(ixns + 1);
-            }
-            break;
-        case 0b11:
-            instr->operand2.type = OT_REGISTER;
-            instr->operand2.reg = regbits_to_enum_w(rm, w, SIZE_32);
-            break;
-    }
+    instr_size += decode_modrm(modrm, w, ixns + 1, instr);
 
     // If direction bit is set, swap the operands
     if(!d) {
