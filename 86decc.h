@@ -33,18 +33,18 @@ typedef enum REGISTER_t {
     REG_AH,
     REG_AX,
     REG_EAX, // 4
-    REG_BL,  // 5
-    REG_BH,
-    REG_BX,
-    REG_EBX, // 8
-    REG_CL,  // 9
+    REG_CL,  // 5
     REG_CH,
     REG_CX,
-    REG_ECX, // 12
-    REG_DL,  // 13
+    REG_ECX, // 8
+    REG_DL,  // 9
     REG_DH,
     REG_DX,
-    REG_EDX, // 16
+    REG_EDX, // 12
+    REG_BL,  // 13
+    REG_BH,
+    REG_BX,
+    REG_EBX, // 16
     REG_SP,
     REG_ESP, // 18
     REG_BP,
