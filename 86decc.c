@@ -256,6 +256,10 @@ size_t decode(const uint8_t* ixns, INSTR* instr) {
         case 0b0100:
             // DEC (alternate)
             // INC (alternate)
+            instr->opcode = OP_INC + ((opcode_l & 0x8) >> 3);
+            instr->operand1.type = OT_REGISTER;
+            instr->operand1.reg = regbits_to_enum_w(opcode_l & 7, true, SIZE_32);
+            return 1;
             break;
         case 0b0101:
             // POP (alternate)

@@ -448,3 +448,49 @@ UTEST(xor, memnodisp_imm8_sign) {
     ASSERT_EQ((OPERAND_TYPE)OT_IMMEDIATE, op2.type);
     ASSERT_EQ((uint32_t)0xFFFFFF91, op2.immediate);
 }
+
+UTEST(inc, alternate) {
+    const uint8_t input[] = { 0x40, 0x41, 0x42, 0x43,
+                              0x44, 0x45, 0x46, 0x47 };
+
+    INSTR output = {0};
+
+    const uint8_t* cursor = input;
+    for(size_t i = 0; i < 4; i++) {
+        memset(&output, 0, sizeof(output));
+        const size_t instr_size = decode(cursor, &output);
+
+        ASSERT_EQ((size_t)1, instr_size);
+        ASSERT_EQ((OPCODE)OP_INC, output.opcode);
+
+        ASSERT_EQ((OPERAND_TYPE)OT_REGISTER, output.operand1.type);
+        ASSERT_EQ((REGISTER)(REG_EAX + i * 4), output.operand1.reg);
+
+        ASSERT_EQ((OPERAND_TYPE)OT_NONE, output.operand2.type);
+
+        cursor += instr_size;
+    }
+}
+
+UTEST(dec, alternate) {
+    const uint8_t input[] = { 0x48, 0x49, 0x4A, 0x4B,
+                              0x4C, 0x4D, 0x4E, 0x4F };
+
+    INSTR output = {0};
+
+    const uint8_t* cursor = input;
+    for(size_t i = 0; i < 4; i++) {
+        memset(&output, 0, sizeof(output));
+        const size_t instr_size = decode(cursor, &output);
+
+        ASSERT_EQ((size_t)1, instr_size);
+        ASSERT_EQ((OPCODE)OP_DEC, output.opcode);
+
+        ASSERT_EQ((OPERAND_TYPE)OT_REGISTER, output.operand1.type);
+        ASSERT_EQ((REGISTER)(REG_EAX + i * 4), output.operand1.reg);
+
+        ASSERT_EQ((OPERAND_TYPE)OT_NONE, output.operand2.type);
+
+        cursor += instr_size;
+    }
+}
