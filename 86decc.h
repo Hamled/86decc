@@ -83,7 +83,6 @@ typedef struct OPERAND_t {
     OPERAND_TYPE type;
     union {
         REGISTER reg;
-        uint32_t memory;
         uint32_t immediate;
         OPERAND_MODRM modrm;
         OPERAND_SIB sib;
