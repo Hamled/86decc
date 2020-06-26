@@ -731,6 +731,38 @@ UTEST(push, memdisp8_32) {
     ASSERT_EQ((OPERAND_TYPE)OT_NONE, output.operand2.type);
 }
 
+UTEST(push, imm8) {
+    const uint8_t input[] = { 0x6A, 0xA4 };
+
+    INSTR output = {0};
+
+    const size_t instr_size = decode(input, &output);
+
+    ASSERT_EQ((size_t)2, instr_size);
+    ASSERT_EQ((OPCODE)OP_PUSH, output.opcode);
+
+    ASSERT_EQ((OPERAND_TYPE)OT_IMMEDIATE, output.operand1.type);
+    ASSERT_EQ((uint32_t)0xFFFFFFA4, output.operand1.immediate);
+
+    ASSERT_EQ((OPERAND_TYPE)OT_NONE, output.operand2.type);
+}
+
+UTEST(push, imm32) {
+    const uint8_t input[] = { 0x68, 0x87, 0x40, 0x21, 0x00 };
+
+    INSTR output = {0};
+
+    const size_t instr_size = decode(input, &output);
+
+    ASSERT_EQ((size_t)5, instr_size);
+    ASSERT_EQ((OPCODE)OP_PUSH, output.opcode);
+
+    ASSERT_EQ((OPERAND_TYPE)OT_IMMEDIATE, output.operand1.type);
+    ASSERT_EQ((uint32_t)0x00214087, output.operand1.immediate);
+
+    ASSERT_EQ((OPERAND_TYPE)OT_NONE, output.operand2.type);
+}
+
 UTEST(pop, alternate) {
     const uint8_t input[] = { 0x58, 0x59, 0x5A, 0x5B,
                               0x5C, 0x5D, 0x5E, 0x5F };

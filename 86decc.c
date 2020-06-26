@@ -325,10 +325,21 @@ size_t decode(const uint8_t* ixns, INSTR* instr) {
             // OP_POPA/OP_POPAD
             // BOUND
             // ARPL
-            // PUSH
             // IMUL
             // INS
             // OUTS
+            if((opcode_l & 0b1101) == 0b1000) {
+                // PUSH
+                instr->opcode = OP_PUSH;
+                instr->operand1.type = OT_IMMEDIATE;
+                if((opcode_l & 0b0010) >> 1) {
+                    instr->operand1.immediate = (int32_t)*(int8_t*)(ixns + 1);
+                    return 2;
+                } else {
+                    instr->operand1.immediate = *(uint32_t*)(ixns + 1);
+                    return 5;
+                }
+            }
             break;
         case 0b0111:
             // Jcc
