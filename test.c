@@ -484,7 +484,7 @@ UTEST(inc, reg8) {
 
     OPERAND op1 = output.operand1;
     ASSERT_EQ((OPERAND_TYPE)OT_REGISTER, op1.type);
-    ASSERT_EQ((REGISTER)REG_BL, op1.modrm.reg);
+    ASSERT_EQ((REGISTER)REG_BL, op1.reg);
 
     ASSERT_EQ((OPERAND_TYPE)OT_NONE, output.operand2.type);
 }
@@ -501,7 +501,7 @@ UTEST(inc, reg32) {
 
     OPERAND op1 = output.operand1;
     ASSERT_EQ((OPERAND_TYPE)OT_REGISTER, op1.type);
-    ASSERT_EQ((REGISTER)REG_EDX, op1.modrm.reg);
+    ASSERT_EQ((REGISTER)REG_EDX, op1.reg);
 
     ASSERT_EQ((OPERAND_TYPE)OT_NONE, output.operand2.type);
 }
@@ -581,7 +581,7 @@ UTEST(dec, reg8) {
 
     OPERAND op1 = output.operand1;
     ASSERT_EQ((OPERAND_TYPE)OT_REGISTER, op1.type);
-    ASSERT_EQ((REGISTER)REG_BL, op1.modrm.reg);
+    ASSERT_EQ((REGISTER)REG_BL, op1.reg);
 
     ASSERT_EQ((OPERAND_TYPE)OT_NONE, output.operand2.type);
 }
@@ -598,7 +598,7 @@ UTEST(dec, reg32) {
 
     OPERAND op1 = output.operand1;
     ASSERT_EQ((OPERAND_TYPE)OT_REGISTER, op1.type);
-    ASSERT_EQ((REGISTER)REG_EDX, op1.modrm.reg);
+    ASSERT_EQ((REGISTER)REG_EDX, op1.reg);
 
     ASSERT_EQ((OPERAND_TYPE)OT_NONE, output.operand2.type);
 }
