@@ -204,6 +204,20 @@ static size_t decode_opcode_grp1_imm(uint8_t flags, const uint8_t* ixns, INSTR* 
     return instr_size;
 }
 
+static size_t decode_opcode_grp1a(const uint8_t* ixns, INSTR* instr) {
+    size_t instr_size = 1;
+
+    instr->opcode = OP_POP;
+
+    instr_size += decode_modrm(*ixns, true, ixns + 1, instr);
+
+    // Always swap since decode_modrm sets operand2
+    instr->operand1 = instr->operand2;
+    memset(&instr->operand2, 0, sizeof(OPERAND));
+
+    return instr_size;
+}
+
 static size_t decode_opcode_grp4_5(const uint8_t flags, const uint8_t* ixns, INSTR* instr) {
     const bool w = (flags & 0b0001) == 0b0001;
     size_t instr_size = 1;
@@ -217,6 +231,18 @@ static size_t decode_opcode_grp4_5(const uint8_t flags, const uint8_t* ixns, INS
         instr->operand1 = instr->operand2;
         memset(&instr->operand2, 0, sizeof(OPERAND));
         return instr_size;
+    } else if(flags == 0xF) {
+        switch(ext) {
+            case 0b110:
+                // PUSH
+                instr->opcode = OP_PUSH;
+                instr_size += decode_modrm(*ixns, w, ixns + 1, instr);
+
+                // Always swap instructions and set operand2 to none
+                instr->operand1 = instr->operand2;
+                memset(&instr->operand2, 0, sizeof(OPERAND));
+                return instr_size;
+        }
     }
 
     return 0;
@@ -314,6 +340,8 @@ size_t decode(const uint8_t* ixns, INSTR* instr) {
             if((opcode_l >> 2) == 0) {
                 instr->opcode = (OP_ADD + opcode_extension(*(ixns + 1)));
                 return decode_opcode_grp1_imm(opcode_l & 0x3, ixns + 1, instr);
+            } else if(opcode_l == 0xF) {
+                return decode_opcode_grp1a(ixns + 1, instr);
             }
             break;
         case 0b1001:
