@@ -284,13 +284,16 @@ size_t decode(const uint8_t* ixns, INSTR* instr) {
             // INC (alternate)
             instr->opcode = OP_INC + ((opcode_l & 0x8) >> 3);
             instr->operand1.type = OT_REGISTER;
-            instr->operand1.reg = regbits_to_enum_w(opcode_l & 7, true, SIZE_32);
+            instr->operand1.reg = regbits_to_enum_w(opcode_l & 0x7, true, SIZE_32);
             return 1;
             break;
         case 0b0101:
             // POP (alternate)
             // PUSH (alternate)
-            break;
+            instr->opcode = OP_PUSH + ((opcode_l & 0x8) >> 3);
+            instr->operand1.type = OT_REGISTER;
+            instr->operand1.reg = regbits_to_enum_w(opcode_l & 0x7, true, SIZE_32);
+            return 1;
         case 0b0110:
             // OP_PUSHA/OP_PUSHAD
             // OP_POPA/OP_POPAD

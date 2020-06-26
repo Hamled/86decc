@@ -64,5 +64,11 @@ void print_instr(INSTR* instr) {
         case OP_DEC:
             puts("DEC");
             break;
+        case OP_PUSH:
+            puts("PUSH");
+            break;
+        case OP_POP:
+            puts("POP");
+            break;
     }
 }

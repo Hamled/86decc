@@ -663,3 +663,49 @@ UTEST(dec, sibdisp8_32) {
 
     ASSERT_EQ((OPERAND_TYPE)OT_NONE, output.operand2.type);
 }
+
+UTEST(push, alternate) {
+    const uint8_t input[] = { 0x50, 0x51, 0x52, 0x53,
+                              0x54, 0x55, 0x56, 0x57 };
+
+    INSTR output = {0};
+
+    const uint8_t* cursor = input;
+    for(size_t i = 0; i < 4; i++) {
+        memset(&output, 0, sizeof(output));
+        const size_t instr_size = decode(cursor, &output);
+
+        ASSERT_EQ((size_t)1, instr_size);
+        ASSERT_EQ((OPCODE)OP_PUSH, output.opcode);
+
+        ASSERT_EQ((OPERAND_TYPE)OT_REGISTER, output.operand1.type);
+        ASSERT_EQ((REGISTER)(REG_EAX + i * 4), output.operand1.reg);
+
+        ASSERT_EQ((OPERAND_TYPE)OT_NONE, output.operand2.type);
+
+        cursor += instr_size;
+    }
+}
+
+UTEST(pop, alternate) {
+    const uint8_t input[] = { 0x58, 0x59, 0x5A, 0x5B,
+                              0x5C, 0x5D, 0x5E, 0x5F };
+
+    INSTR output = {0};
+
+    const uint8_t* cursor = input;
+    for(size_t i = 0; i < 4; i++) {
+        memset(&output, 0, sizeof(output));
+        const size_t instr_size = decode(cursor, &output);
+
+        ASSERT_EQ((size_t)1, instr_size);
+        ASSERT_EQ((OPCODE)OP_POP, output.opcode);
+
+        ASSERT_EQ((OPERAND_TYPE)OT_REGISTER, output.operand1.type);
+        ASSERT_EQ((REGISTER)(REG_EAX + i * 4), output.operand1.reg);
+
+        ASSERT_EQ((OPERAND_TYPE)OT_NONE, output.operand2.type);
+
+        cursor += instr_size;
+    }
+}

@@ -27,6 +27,9 @@ typedef enum OPCODE_t {
 
     OP_INC,
     OP_DEC,
+
+    OP_PUSH,
+    OP_POP,
 } OPCODE;
 
 typedef enum REGISTER_t {
