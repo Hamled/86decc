@@ -74,6 +74,7 @@ UTEST(sbb, memdisp0_reg8) {
     ASSERT_EQ((OPCODE)OP_SBB, output.opcode);
 
     ASSERT_EQ((OPERAND_TYPE)OT_MODRM, output.operand1.type);
+    ASSERT_EQ((OPSIZE)SIZE_8, output.operand1.modrm.size);
     ASSERT_EQ((REGISTER)REG_EBX, output.operand1.modrm.reg);
     ASSERT_EQ((int32_t)0x0, output.operand1.modrm.displacement);
 
@@ -90,6 +91,7 @@ UTEST(or, memdisp8_reg32) {
     ASSERT_EQ((OPCODE)OP_OR, output.opcode);
 
     ASSERT_EQ((OPERAND_TYPE)OT_MODRM, output.operand1.type);
+    ASSERT_EQ((OPSIZE)SIZE_32, output.operand1.modrm.size);
     ASSERT_EQ((REGISTER)REG_ESI, output.operand1.modrm.reg);
     ASSERT_EQ((int32_t)0x44, output.operand1.modrm.displacement);
 
@@ -106,6 +108,7 @@ UTEST(adc, memdisp32_reg32) {
     ASSERT_EQ((OPCODE)OP_ADC, output.opcode);
 
     ASSERT_EQ((OPERAND_TYPE)OT_MODRM, output.operand1.type);
+    ASSERT_EQ((OPSIZE)SIZE_32, output.operand1.modrm.size);
     ASSERT_EQ((REGISTER)REG_EDI, output.operand1.modrm.reg);
     ASSERT_EQ(0x44332211, output.operand1.modrm.displacement);
 
@@ -125,6 +128,7 @@ UTEST(cmp, reg8_disp32) {
     ASSERT_EQ((REGISTER)REG_BH, output.operand1.reg);
 
     ASSERT_EQ((OPERAND_TYPE)OT_MODRM, output.operand2.type);
+    ASSERT_EQ((OPSIZE)SIZE_8, output.operand2.modrm.size);
     ASSERT_EQ((REGISTER)REG_NONE, output.operand2.modrm.reg);
     ASSERT_EQ((int32_t)0xD4C3B2A1, output.operand2.modrm.displacement);
 }
@@ -139,6 +143,7 @@ UTEST(multi, instr2_disp8) {
     ASSERT_EQ((OPCODE)OP_OR, output.opcode);
 
     ASSERT_EQ((OPERAND_TYPE)OT_MODRM, output.operand1.type);
+    ASSERT_EQ((OPSIZE)SIZE_32, output.operand1.modrm.size);
     ASSERT_EQ((REGISTER)REG_ESI, output.operand1.modrm.reg);
     ASSERT_EQ((int32_t)0x44, output.operand1.modrm.displacement);
 
@@ -152,6 +157,7 @@ UTEST(multi, instr2_disp8) {
     ASSERT_EQ((OPCODE)OP_ADD, output.opcode);
 
     ASSERT_EQ((OPERAND_TYPE)OT_MODRM, output.operand1.type);
+    ASSERT_EQ((OPSIZE)SIZE_8, output.operand1.modrm.size);
     ASSERT_EQ((REGISTER)REG_EAX, output.operand1.modrm.reg);
     ASSERT_EQ((int32_t)0, output.operand1.modrm.displacement);
 
@@ -172,6 +178,7 @@ UTEST(multi, instr2_disp32) {
     ASSERT_EQ((REGISTER)REG_BH, output.operand1.reg);
 
     ASSERT_EQ((OPERAND_TYPE)OT_MODRM, output.operand2.type);
+    ASSERT_EQ((OPSIZE)SIZE_8, output.operand2.modrm.size);
     ASSERT_EQ((REGISTER)REG_NONE, output.operand2.modrm.reg);
     ASSERT_EQ((int32_t)0xD4C3B2A1, output.operand2.modrm.displacement);
 
@@ -182,6 +189,7 @@ UTEST(multi, instr2_disp32) {
     ASSERT_EQ((OPCODE)OP_ADD, output.opcode);
 
     ASSERT_EQ((OPERAND_TYPE)OT_MODRM, output.operand1.type);
+    ASSERT_EQ((OPSIZE)SIZE_8, output.operand1.modrm.size);
     ASSERT_EQ((REGISTER)REG_EAX, output.operand1.modrm.reg);
     ASSERT_EQ((int32_t)0, output.operand1.modrm.displacement);
 
@@ -207,6 +215,7 @@ UTEST(or, sibdisp0_reg32) {
         ASSERT_EQ((OPCODE)OP_OR, output.opcode);
 
         ASSERT_EQ((OPERAND_TYPE)OT_SIB, output.operand1.type);
+        ASSERT_EQ((OPSIZE)SIZE_32, output.operand1.sib.size);
         ASSERT_EQ(scale, output.operand1.sib.scale);
         ASSERT_EQ((REGISTER)REG_EAX, output.operand1.sib.index);
         ASSERT_EQ((REGISTER)REG_ECX, output.operand1.sib.base);
@@ -240,6 +249,7 @@ UTEST(xor, reg8_sibdisp8) {
         ASSERT_EQ((REGISTER)REG_AH, output.operand1.reg);
 
         ASSERT_EQ((OPERAND_TYPE)OT_SIB, output.operand2.type);
+        ASSERT_EQ((OPSIZE)SIZE_8, output.operand2.sib.size);
         ASSERT_EQ(scale, output.operand2.sib.scale);
         ASSERT_EQ((REGISTER)REG_ECX, output.operand2.sib.index);
         ASSERT_EQ((REGISTER)REG_EBX, output.operand2.sib.base);
@@ -267,6 +277,7 @@ UTEST(sbb, sibdisp32_reg8) {
         ASSERT_EQ((OPCODE)OP_SBB, output.opcode);
 
         ASSERT_EQ((OPERAND_TYPE)OT_SIB, output.operand1.type);
+        ASSERT_EQ((OPSIZE)SIZE_8, output.operand1.sib.size);
         ASSERT_EQ(scale, output.operand1.sib.scale);
         ASSERT_EQ((REGISTER)REG_EBP, output.operand1.sib.index);
         ASSERT_EQ((REGISTER)REG_EDX, output.operand1.sib.base);
@@ -294,6 +305,7 @@ UTEST(cmp, sibdisp0no_scale__reg8) {
         ASSERT_EQ((OPCODE)OP_CMP, output.opcode);
 
         ASSERT_EQ((OPERAND_TYPE)OT_SIB, output.operand1.type);
+        ASSERT_EQ((OPSIZE)SIZE_8, output.operand1.sib.size);
         ASSERT_EQ(0x0, output.operand1.sib.scale);
         ASSERT_EQ((REGISTER)REG_NONE, output.operand1.sib.index);
         ASSERT_EQ((REGISTER)REG_ESI, output.operand1.sib.base);
@@ -322,6 +334,7 @@ UTEST(sub, sibdisp32no_ebp__reg32) {
         ASSERT_EQ((OPCODE)OP_SUB, output.opcode);
 
         ASSERT_EQ((OPERAND_TYPE)OT_SIB, output.operand1.type);
+        ASSERT_EQ((OPSIZE)SIZE_32, output.operand1.sib.size);
         ASSERT_EQ(scale, output.operand1.sib.scale);
         ASSERT_EQ((REGISTER)REG_EAX, output.operand1.sib.index);
         ASSERT_EQ((REGISTER)REG_NONE, output.operand1.sib.base);
@@ -353,6 +366,7 @@ UTEST(adc, reg32__sibdisp8_ebp) {
         ASSERT_EQ((REGISTER)REG_EDI, output.operand1.reg);
 
         ASSERT_EQ((OPERAND_TYPE)OT_SIB, output.operand2.type);
+        ASSERT_EQ((OPSIZE)SIZE_32, output.operand2.sib.size);
         ASSERT_EQ(scale, output.operand2.sib.scale);
         ASSERT_EQ((REGISTER)REG_ECX, output.operand2.sib.index);
         ASSERT_EQ((REGISTER)REG_EBP, output.operand2.sib.base);
@@ -381,6 +395,7 @@ UTEST(add, reg8__sibdisp32_ebp) {
         ASSERT_EQ((REGISTER)REG_DH, output.operand1.reg);
 
         ASSERT_EQ((OPERAND_TYPE)OT_SIB, output.operand2.type);
+        ASSERT_EQ((OPSIZE)SIZE_8, output.operand2.sib.size);
         ASSERT_EQ(scale, output.operand2.sib.scale);
         ASSERT_EQ((REGISTER)REG_EDX, output.operand2.sib.index);
         ASSERT_EQ((REGISTER)REG_EBP, output.operand2.sib.base);
@@ -421,6 +436,7 @@ UTEST(cmp, memdisp32_imm32_nosign) {
 
     OPERAND op1 = output.operand1;
     ASSERT_EQ((OPERAND_TYPE)OT_MODRM, op1.type);
+    ASSERT_EQ((OPSIZE)SIZE_32, op1.modrm.size);
     ASSERT_EQ((REGISTER)REG_ECX, op1.modrm.reg);
     ASSERT_EQ((int32_t)0x0A, op1.modrm.displacement);
 
@@ -441,6 +457,7 @@ UTEST(xor, memnodisp_imm8_sign) {
 
     OPERAND op1 = output.operand1;
     ASSERT_EQ((OPERAND_TYPE)OT_MODRM, op1.type);
+    ASSERT_EQ((OPSIZE)SIZE_32, op1.modrm.size);
     ASSERT_EQ((REGISTER)REG_EDX, op1.modrm.reg);
     ASSERT_EQ((int32_t)0x0, op1.modrm.displacement);
 
@@ -518,6 +535,7 @@ UTEST(inc, sibdisp32_8) {
 
     OPERAND op1 = output.operand1;
     ASSERT_EQ((OPERAND_TYPE)OT_SIB, op1.type);
+    ASSERT_EQ((OPSIZE)SIZE_8, op1.sib.size);
     ASSERT_EQ(0x4, op1.sib.scale);
     ASSERT_EQ((REGISTER)REG_ESI, op1.sib.index);
     ASSERT_EQ((REGISTER)REG_EDX, op1.sib.base);
@@ -538,6 +556,7 @@ UTEST(inc, sibdisp8_32) {
 
     OPERAND op1 = output.operand1;
     ASSERT_EQ((OPERAND_TYPE)OT_SIB, op1.type);
+    ASSERT_EQ((OPSIZE)SIZE_32, op1.sib.size);
     ASSERT_EQ(0x8, op1.sib.scale);
     ASSERT_EQ((REGISTER)REG_EDX, op1.sib.index);
     ASSERT_EQ((REGISTER)REG_EAX, op1.sib.base);
@@ -615,6 +634,7 @@ UTEST(dec, sibdisp32_8) {
 
     OPERAND op1 = output.operand1;
     ASSERT_EQ((OPERAND_TYPE)OT_SIB, op1.type);
+    ASSERT_EQ((OPSIZE)SIZE_8, op1.sib.size);
     ASSERT_EQ(0x4, op1.sib.scale);
     ASSERT_EQ((REGISTER)REG_ESI, op1.sib.index);
     ASSERT_EQ((REGISTER)REG_EDX, op1.sib.base);
@@ -635,6 +655,7 @@ UTEST(dec, sibdisp8_32) {
 
     OPERAND op1 = output.operand1;
     ASSERT_EQ((OPERAND_TYPE)OT_SIB, op1.type);
+    ASSERT_EQ((OPSIZE)SIZE_32, op1.sib.size);
     ASSERT_EQ(0x8, op1.sib.scale);
     ASSERT_EQ((REGISTER)REG_EDX, op1.sib.index);
     ASSERT_EQ((REGISTER)REG_EAX, op1.sib.base);

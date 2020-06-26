@@ -67,12 +67,21 @@ typedef enum OPERAND_TYPE_t {
     OT_SIB,
 } OPERAND_TYPE;
 
+typedef enum OPSIZE_t {
+    SIZE_UNKNOWN = 0,
+    SIZE_8,
+    SIZE_16,
+    SIZE_32,
+} OPSIZE;
+
 typedef struct OPERAND_MODRM_t {
+    OPSIZE size;
     REGISTER reg;
     int32_t displacement;
 } OPERAND_MODRM;
 
 typedef struct OPERAND_SIB_t {
+    OPSIZE size;
     uint8_t scale;
     REGISTER index;
     REGISTER base;
@@ -94,12 +103,6 @@ typedef struct INSTR_t {
     OPERAND operand1;
     OPERAND operand2;
 } INSTR;
-
-typedef enum OPSIZE_t {
-    SIZE_16,
-    SIZE_32,
-} OPSIZE;
-
 
 size_t decode(const uint8_t* ixns, INSTR* instr);
 
