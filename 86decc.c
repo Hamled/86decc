@@ -45,6 +45,11 @@ static void decode_sib(const uint8_t sib, const uint8_t mod, OPERAND* oper) {
     const uint8_t index = (sib & 0x38) >> 3;
     const uint8_t base = sib & 0x7;
 
+    // Attempt to decode SIB byte into NULL operand
+    if(!oper) {
+        abort();
+    }
+
     oper->type = OT_SIB;
     oper->sib.scale = pow(2, scale);
     oper->sib.index = regbits_to_enum_w(index, true, SIZE_32);
@@ -65,6 +70,11 @@ static size_t decode_modrm(const uint8_t modrm, const bool w, const uint8_t* ixn
     const uint8_t mod = modrm >> 6;
     const uint8_t rm  = modrm & 0x7;
     const uint8_t reg = (modrm & 0b111000) >> 3;
+
+    // Attempt to decode ModR/M byte into NULL instruction
+    if(!instr) {
+        abort();
+    }
 
     size_t instr_size = 1;
 
